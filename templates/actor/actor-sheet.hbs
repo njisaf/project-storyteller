@@ -1,0 +1,118 @@
+<form class="{{cssClass}} {{actor.type}} flexcol" autocomplete="off">
+    <header class="sheet-header">
+        <img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" height="100" width="100"/>
+        <div class="header-fields">
+            <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
+            <div class="resources grid grid-3col">
+                <div class="resource flex-group-center">
+                    <label for="data.health.value" class="resource-label">Health</label>
+                    <div class="resource-content flexrow flex-center flex-between">
+                        <input type="text" name="data.health.value" value="{{data.health.value}}" data-dtype="Number"/>
+                        <span> / </span>
+                        <input type="text" name="data.health.max" value="{{data.health.max}}" data-dtype="Number"/>
+                    </div>
+                </div>
+                <div class="resource flex-group-center">
+                    <label for="data.actionPoints.value" class="resource-label">Action Points</label>
+                    <div class="resource-content flexrow flex-center flex-between">
+                        <input type="text" name="data.actionPoints.value" value="{{data.actionPoints.value}}" data-dtype="Number"/>
+                        <span> / </span>
+                        <input type="text" name="data.actionPoints.max" value="{{data.actionPoints.max}}" data-dtype="Number"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    {{!-- Sheet Tab Navigation --}}
+    <nav class="sheet-tabs tabs" data-group="primary">
+        <a class="item" data-tab="aspects">Aspects</a>
+        <a class="item" data-tab="skills">Skills</a>
+        <a class="item" data-tab="description">Description</a>
+        <a class="item" data-tab="items">Items</a>
+    </nav>
+
+    {{!-- Sheet Body --}}
+    <section class="sheet-body">
+        {{!-- Aspects Tab --}}
+        <div class="tab aspects" data-group="primary" data-tab="aspects">
+            <div class="aspects-list">
+                {{#each data.aspects as |aspect key|}}
+                <div class="aspect flexrow flex-group-center">
+                    <label for="data.aspects.{{key}}.value" class="resource-label">{{key}}</label>
+                    <div class="resource-content flexrow flex-center flex-between">
+                        <input type="text" name="data.aspects.{{key}}.value" value="{{aspect.value}}" data-dtype="Number"/>
+                        <span class="aspect-mod">({{numberFormat aspect.modifier decimals=0 sign=true}})</span>
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+
+        {{!-- Skills Tab --}}
+        <div class="tab skills" data-group="primary" data-tab="skills">
+            {{#each data.skills as |skillCategory categoryKey|}}
+            <div class="skill-category">
+                <h2>{{categoryKey}}</h2>
+                <div class="skills-list">
+                    {{#each skillCategory as |skill skillKey|}}
+                    <div class="skill flexrow">
+                        <span class="skill-name">{{skillKey}}</span>
+                        <div class="skill-controls">
+                            <label>Base</label>
+                            <input type="text" name="data.skills.{{categoryKey}}.{{skillKey}}.value" value="{{skill.value}}" data-dtype="Number"/>
+                            <label>Apt</label>
+                            <input type="text" name="data.skills.{{categoryKey}}.{{skillKey}}.aptitude" value="{{skill.aptitude}}" data-dtype="Number"/>
+                            <span class="skill-total">Total: {{skill.total}}</span>
+                            <button type="button" class="skill-roll" data-skill="{{skillKey}}" data-category="{{categoryKey}}">
+                                <i class="fas fa-dice-d20"></i> Roll
+                            </button>
+                        </div>
+                    </div>
+                    {{/each}}
+                </div>
+            </div>
+            {{/each}}
+        </div>
+
+        {{!-- Description Tab --}}
+        <div class="tab description" data-group="primary" data-tab="description">
+            <div class="form-group">
+                <label>Descent</label>
+                <input type="text" name="data.descent" value="{{data.descent}}"/>
+            </div>
+            <div class="form-group">
+                <label>Culture</label>
+                <input type="text" name="data.culture" value="{{data.culture}}"/>
+            </div>
+            <div class="form-group">
+                <label>Vocation</label>
+                <input type="text" name="data.vocation" value="{{data.vocation}}"/>
+            </div>
+            <div class="form-group">
+                <label>Role</label>
+                <input type="text" name="data.role" value="{{data.role}}"/>
+            </div>
+            <div class="form-group">
+                <label>Biography</label>
+                {{editor content=data.biography target="data.biography" button=true owner=owner editable=editable}}
+            </div>
+        </div>
+
+        {{!-- Items Tab --}}
+        <div class="tab items" data-group="primary" data-tab="items">
+            <ol class="items-list">
+                {{#each actor.items as |item id|}}
+                <li class="item flexrow" data-item-id="{{item._id}}">
+                    <img src="{{item.img}}" title="{{item.name}}" width="24" height="24"/>
+                    <h4 class="item-name">{{item.name}}</h4>
+                    <div class="item-controls">
+                        <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
+                        <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
+                    </div>
+                </li>
+                {{/each}}
+            </ol>
+        </div>
+    </section>
+</form>

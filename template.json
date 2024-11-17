@@ -1,8 +1,140 @@
 {
   "Actor": {
-    "types": ["character", "npc"]
+    "types": ["character", "npc"],
+    "templates": {
+      "base": {
+        "aspects": {
+          "focus": {
+            "value": 0,
+            "modifier": 0
+          },
+          "grace": {
+            "value": 0,
+            "modifier": 0
+          },
+          "intellect": {
+            "value": 0,
+            "modifier": 0
+          },
+          "might": {
+            "value": 0,
+            "modifier": 0
+          }
+        },
+        "health": {
+          "value": 10,
+          "max": 10
+        },
+        "actionPoints": {
+          "value": 3,
+          "max": 3
+        }
+      }
+    },
+    "character": {
+      "templates": ["base"],
+      "skills": {
+        "combat": {
+          "melee": {
+            "value": 0,
+            "aptitude": 0,
+            "aspect": "might"
+          },
+          "ranged": {
+            "value": 0,
+            "aptitude": 0,
+            "aspect": "grace"
+          },
+          "defense": {
+            "value": 0,
+            "aptitude": 0,
+            "aspect": "grace"
+          }
+        },
+        "social": {
+          "persuasion": {
+            "value": 0,
+            "aptitude": 0,
+            "aspect": "focus"
+          },
+          "deception": {
+            "value": 0,
+            "aptitude": 0,
+            "aspect": "focus"
+          },
+          "intimidation": {
+            "value": 0,
+            "aptitude": 0,
+            "aspect": "might"
+          }
+        },
+        "investigative": {
+          "perception": {
+            "value": 0,
+            "aptitude": 0,
+            "aspect": "focus"
+          },
+          "investigation": {
+            "value": 0,
+            "aptitude": 0,
+            "aspect": "intellect"
+          },
+          "knowledge": {
+            "value": 0,
+            "aptitude": 0,
+            "aspect": "intellect"
+          }
+        },
+        "magical": {
+          "spellcraft": {
+            "value": 0,
+            "aptitude": 0,
+            "aspect": "intellect"
+          },
+          "ritual": {
+            "value": 0,
+            "aptitude": 0,
+            "aspect": "focus"
+          },
+          "channeling": {
+            "value": 0,
+            "aptitude": 0,
+            "aspect": "grace"
+          }
+        }
+      },
+      "biography": "",
+      "descent": "",
+      "culture": "",
+      "vocation": "",
+      "role": ""
+    },
+    "npc": {
+      "templates": ["base"]
+    }
   },
   "Item": {
-    "types": ["item", "feature", "spell"]
+    "types": ["item", "feature", "spell"],
+    "templates": {
+      "base": {
+        "description": "",
+        "quantity": 1,
+        "weight": 0
+      }
+    },
+    "item": {
+      "templates": ["base"],
+      "price": 0,
+      "rarity": "common"
+    },
+    "feature": {
+      "templates": ["base"]
+    },
+    "spell": {
+      "templates": ["base"],
+      "level": 1,
+      "school": "",
+      "actionCost": 1
+    }
   }
 }

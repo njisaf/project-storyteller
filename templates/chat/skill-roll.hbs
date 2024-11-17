@@ -1,0 +1,32 @@
+<div class="project-storyteller roll-result">
+    <h2>{{skillName}} Check</h2>
+    <div class="dice-roll">
+        <div class="dice-result">
+            <div class="dice-formula">
+                2d10 + {{roll.formula}}
+            </div>
+            {{#if roll.dice}}
+            <div class="dice-tooltip">
+                <div class="part-formula">
+                    Base Roll: {{roll.total}}<br/>
+                    Skill Value: {{skill.value}}<br/>
+                    Aptitude: {{skill.aptitude}}<br/>
+                    {{skill.aspect}} Modifier: {{aspectMod}}
+                </div>
+            </div>
+            {{/if}}
+            <div class="dice-total {{resultClass}}">
+                {{total}}
+                {{#if isCriticalSuccess}}
+                (Critical Success!)
+                {{else if isSuccess}}
+                (Success)
+                {{else if isCriticalFailure}}
+                (Critical Failure!)
+                {{else}}
+                (Failure)
+                {{/if}}
+            </div>
+        </div>
+    </div>
+</div>
