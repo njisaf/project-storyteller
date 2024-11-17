@@ -19,7 +19,7 @@ Regardless of which method you choose, think carefully about your system's name.
 This system includes a generator CLI in `package.json`. To use it, you must have [node.js](https://nodejs.org) installed, and it's recommended that you install node 20 or later.
 
 > **Python Generator**
-> 
+>
 > If you would rather use Python than node, there’s an excellent Python-based generator created by Cussa at https://github.com/Cussa/fvtt-project-storyteller-initializator. Give it a shot!
 
 Once you have npm installed, you can run the following in your terminal or command prompt:
@@ -80,3 +80,50 @@ This system includes a handful of helper CSS classes to help you lay out your sh
 This repo includes both CSS for the theme and SCSS source files. If you're new to CSS, it's probably easier to just work in those files directly and delete the SCSS directory. If you're interested in using a CSS preprocessor to add support for nesting, variables, and more, you can run `npm install` in this directory to install the dependencies for the scss compiler. After that, just run `npm run build` to compile the SCSS and start a process that watches for new changes.
 
 ![image](http://mattsmith.in/images/project-storyteller.png)
+
+## File Structure
+
+This system includes several key directories and files that work together to create the foundational structure:
+
+### Core System Files
+- `system.json` - Core system configuration:
+  * Foundry VTT compatibility settings
+  * System metadata and dependencies
+  * Included file paths and resources
+- `template.json` - Data model definitions:
+  * Actor types (character, npc)
+  * Item types (item, feature, spell)
+  * Attribute and property schemas
+- `package.json` - Build configuration:
+  * Development dependencies
+  * Build scripts and commands
+  * System generation utilities
+
+### JavaScript Modules
+- `module/project-storyteller.mjs` - System initialization:
+  * Registers system settings
+  * Configures document classes
+  * Sets up event handlers
+- `module/documents/` - Core document classes:
+  * `actor.mjs` - Base actor type implementations
+  * `item.mjs` - Base item type implementations
+- `module/sheets/` - Sheet implementations:
+  * `actor-sheet.mjs` - Character and NPC sheets
+  * `item-sheet.mjs` - Item, feature, and spell sheets
+
+### Templates
+- `templates/actor/` - Actor sheet templates:
+  * `actor-character-sheet.hbs` - Player character layout
+  * `actor-npc-sheet.hbs` - NPC layout
+- `templates/item/` - Item sheet templates:
+  * `item-feature-sheet.hbs` - Feature layout
+  * `item-spell-sheet.hbs` - Spell layout
+
+### Styles
+- `src/scss/project-storyteller.scss` - Source styles:
+  * Global variables and mixins
+  * Component-specific styles
+  * Layout utilities
+- `css/project-storyteller.css` - Compiled stylesheet:
+  * Production-ready CSS
+  * Browser-compatible output
