@@ -20,7 +20,7 @@
       "thumbnail": "systems/project-storyteller/assets/anvil-impact.png"
     }
   ],
-  "version": "0.2.2",
+  "version": "0.2.3",
   "compatibility": {
     "minimum": 11,
     "verified": "11.315"

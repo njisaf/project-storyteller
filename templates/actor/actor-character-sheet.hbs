@@ -5,19 +5,20 @@
       <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name" /></h1>
       <div class="resources grid grid-3col">
         <div class="resource flex-group-center">
-          <label for="data.health.value" class="resource-label">Health</label>
+          <label for="system.health.value" class="resource-label">Health</label>
           <div class="resource-content flexrow flex-center flex-between">
-            <input type="text" name="data.health.value" value="{{data.health.value}}" data-dtype="Number" />
+            <input type="text" name="system.health.value" value="{{system.health.value}}" data-dtype="Number" />
             <span> / </span>
-            <input type="text" name="data.health.max" value="{{data.health.max}}" data-dtype="Number" />
+            <input type="text" name="system.health.max" value="{{system.health.max}}" data-dtype="Number" />
           </div>
         </div>
         <div class="resource flex-group-center">
-          <label for="data.actionPoints.value" class="resource-label">Action Points</label>
+          <label for="system.actionPoints.value" class="resource-label">Action Points</label>
           <div class="resource-content flexrow flex-center flex-between">
-            <input type="text" name="data.actionPoints.value" value="{{data.actionPoints.value}}" data-dtype="Number" />
+            <input type="text" name="system.actionPoints.value" value="{{system.actionPoints.value}}"
+              data-dtype="Number" />
             <span> / </span>
-            <input type="text" name="data.actionPoints.max" value="{{data.actionPoints.max}}" data-dtype="Number" />
+            <input type="text" name="system.actionPoints.max" value="{{system.actionPoints.max}}" data-dtype="Number" />
           </div>
         </div>
       </div>
@@ -37,11 +38,11 @@
     {{!-- Aspects Tab --}}
     <div class="tab aspects" data-group="primary" data-tab="aspects">
       <div class="aspects-list">
-        {{#each data.aspects as |aspect key|}}
+        {{#each system.aspects as |aspect key|}}
         <div class="aspect flexrow flex-group-center">
-          <label for="data.aspects.{{key}}.value" class="resource-label">{{key}}</label>
+          <label for="system.aspects.{{key}}.value" class="resource-label">{{key}}</label>
           <div class="resource-content flexrow flex-center flex-between">
-            <input type="text" name="data.aspects.{{key}}.value" value="{{aspect.value}}" data-dtype="Number" />
+            <input type="text" name="system.aspects.{{key}}.value" value="{{aspect.value}}" data-dtype="Number" />
             <span class="aspect-mod">({{numberFormat aspect.modifier decimals=0 sign=true}})</span>
           </div>
         </div>
@@ -51,7 +52,7 @@
 
     {{!-- Skills Tab --}}
     <div class="tab skills" data-group="primary" data-tab="skills">
-      {{#each data.skills as |skillCategory categoryKey|}}
+      {{#each system.skills as |skillCategory categoryKey|}}
       <div class="skill-category">
         <h2>{{categoryKey}}</h2>
         <div class="skills-list">
@@ -60,10 +61,10 @@
             <span class="skill-name">{{skillKey}}</span>
             <div class="skill-controls">
               <label>Base</label>
-              <input type="text" name="data.skills.{{categoryKey}}.{{skillKey}}.value" value="{{skill.value}}"
+              <input type="text" name="system.skills.{{categoryKey}}.{{skillKey}}.value" value="{{skill.value}}"
                 data-dtype="Number" />
               <label>Apt</label>
-              <input type="text" name="data.skills.{{categoryKey}}.{{skillKey}}.aptitude" value="{{skill.aptitude}}"
+              <input type="text" name="system.skills.{{categoryKey}}.{{skillKey}}.aptitude" value="{{skill.aptitude}}"
                 data-dtype="Number" />
               <span class="skill-total">Total: {{skill.total}}</span>
               <button type="button" class="skill-roll" data-skill="{{skillKey}}" data-category="{{categoryKey}}">
@@ -81,23 +82,23 @@
     <div class="tab description" data-group="primary" data-tab="description">
       <div class="form-group">
         <label>Descent</label>
-        <input type="text" name="data.descent" value="{{data.descent}}" />
+        <input type="text" name="system.descent" value="{{system.descent}}" />
       </div>
       <div class="form-group">
         <label>Culture</label>
-        <input type="text" name="data.culture" value="{{data.culture}}" />
+        <input type="text" name="system.culture" value="{{system.culture}}" />
       </div>
       <div class="form-group">
         <label>Vocation</label>
-        <input type="text" name="data.vocation" value="{{data.vocation}}" />
+        <input type="text" name="system.vocation" value="{{system.vocation}}" />
       </div>
       <div class="form-group">
         <label>Role</label>
-        <input type="text" name="data.role" value="{{data.role}}" />
+        <input type="text" name="system.role" value="{{system.role}}" />
       </div>
       <div class="form-group">
         <label>Biography</label>
-        {{editor content=data.biography target="data.biography" button=true owner=owner editable=editable}}
+        {{editor content=system.biography target="system.biography" button=true owner=owner editable=editable}}
       </div>
     </div>
 

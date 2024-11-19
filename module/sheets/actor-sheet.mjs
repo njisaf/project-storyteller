@@ -26,6 +26,7 @@ export class StorytellerActorSheet extends ActorSheet {
 
   /** @override */
   get template() {
+    console.log("🚀 ~ StorytellerActorSheet ~ gettemplate ~ this.actor.type:", this.actor.type)
     return `systems/project-storyteller/templates/actor/actor-${this.actor.type}-sheet.hbs`;
   }
 
@@ -38,6 +39,11 @@ export class StorytellerActorSheet extends ActorSheet {
     // sheets are the actor object, the data object, whether or not it's
     // editable, the items array, and the effects array.
     const context = super.getData();
+    console.log("🚀 ~ StorytellerActorSheet ~ getData ~ context INITIAL:", context)
+
+    if (!context || !context.data) {
+      console.error("Context data is missing.");
+    }
 
     // Use a safe clone of the actor data for further operations.
     const actorData = this.document.toPlainObject();
@@ -45,6 +51,10 @@ export class StorytellerActorSheet extends ActorSheet {
     // Add the actor's data to context.data for easier access, as well as flags.
     context.system = actorData.system;
     context.flags = actorData.flags;
+
+    // Add cssClass
+    // TODO: This can't be right
+    context.cssClass = 'storyteller-character-sheet';
 
     // Adding a pointer to CONFIG.PROJECT_STORYTELLER
     context.config = CONFIG.PROJECT_STORYTELLER;
@@ -82,6 +92,7 @@ export class StorytellerActorSheet extends ActorSheet {
       // as well as any items
       this.actor.allApplicableEffects()
     );
+    console.log("🚀 ~ StorytellerActorSheet ~ getData ~ context FINAL:", context)
 
     return context;
   }
