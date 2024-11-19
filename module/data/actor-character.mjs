@@ -1,52 +1,121 @@
+
 import StorytellerActorBase from "./base-actor.mjs";
 
 export default class StorytellerCharacter extends StorytellerActorBase {
-
   static defineSchema() {
     const fields = foundry.data.fields;
     const requiredInteger = { required: true, nullable: false, integer: true };
     const schema = super.defineSchema();
 
-    schema.attributes = new fields.SchemaField({
-      level: new fields.SchemaField({
-        value: new fields.NumberField({ ...requiredInteger, initial: 1 })
-      }),
-    });
+    schema.descent = new fields.StringField({ required: true, blank: true });
+    schema.culture = new fields.StringField({ required: true, blank: true });
+    schema.vocation = new fields.StringField({ required: true, blank: true });
+    schema.role = new fields.StringField({ required: true, blank: true });
+    schema.biography = new fields.StringField({ required: true, blank: true });
 
-    // Iterate over ability names and create a new SchemaField for each.
-    schema.abilities = new fields.SchemaField(Object.keys(CONFIG.PROJECT_STORYTELLER.abilities).reduce((obj, ability) => {
-      obj[ability] = new fields.SchemaField({
-        value: new fields.NumberField({ ...requiredInteger, initial: 10, min: 0 }),
-      });
-      return obj;
-    }, {}));
+    schema.skills = new fields.SchemaField({
+      combat: new fields.SchemaField({
+        melee: new fields.SchemaField({
+          value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+          aptitude: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+          aspect: new fields.StringField({ required: true, initial: "might" })
+        }),
+        ranged: new fields.SchemaField({
+          value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+          aptitude: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+          aspect: new fields.StringField({ required: true, initial: "grace" })
+        }),
+        defense: new fields.SchemaField({
+          value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+          aptitude: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+          aspect: new fields.StringField({ required: true, initial: "grace" })
+        })
+      }),
+      social: new fields.SchemaField({
+        persuasion: new fields.SchemaField({
+          value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+          aptitude: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+          aspect: new fields.StringField({ required: true, initial: "focus" })
+        }),
+        deception: new fields.SchemaField({
+          value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+          aptitude: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+          aspect: new fields.StringField({ required: true, initial: "focus" })
+        }),
+        intimidation: new fields.SchemaField({
+          value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+          aptitude: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+          aspect: new fields.StringField({ required: true, initial: "might" })
+        })
+      }),
+      investigative: new fields.SchemaField({
+        perception: new fields.SchemaField({
+          value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+          aptitude: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+          aspect: new fields.StringField({ required: true, initial: "focus" })
+        }),
+        investigation: new fields.SchemaField({
+          value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+          aptitude: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+          aspect: new fields.StringField({ required: true, initial: "intellect" })
+        }),
+        knowledge: new fields.SchemaField({
+          value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+          aptitude: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+          aspect: new fields.StringField({ required: true, initial: "intellect" })
+        })
+      }),
+      magical: new fields.SchemaField({
+        spellcraft: new fields.SchemaField({
+          value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+          aptitude: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+          aspect: new fields.StringField({ required: true, initial: "intellect" })
+        }),
+        ritual: new fields.SchemaField({
+          value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+          aptitude: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+          aspect: new fields.StringField({ required: true, initial: "focus" })
+        }),
+        channeling: new fields.SchemaField({
+          value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+          aptitude: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+          aspect: new fields.StringField({ required: true, initial: "grace" })
+        })
+      })
+    });
 
     return schema;
   }
 
   prepareDerivedData() {
-    // Loop through ability scores, and add their modifiers to our sheet output.
-    for (const key in this.abilities) {
-      // Calculate the modifier using d20 rules.
-      this.abilities[key].mod = Math.floor((this.abilities[key].value - 10) / 2);
-      // Handle ability label localization.
-      this.abilities[key].label = game.i18n.localize(CONFIG.PROJECT_STORYTELLER.abilities[key]) ?? key;
+    super.prepareDerivedData();
+
+    // Calculate total skill values including aspect modifiers
+    for (const category of Object.values(this.skills)) {
+      for (const [skillName, skill] of Object.entries(category)) {
+        const aspectMod = this.aspects[skill.aspect]?.modifier || 0;
+        skill.total = skill.value + skill.aptitude + aspectMod;
+      }
     }
   }
 
   getRollData() {
     const data = {};
 
-    // Copy the ability scores to the top level, so that rolls can use
-    // formulas like `@str.mod + 4`.
-    if (this.abilities) {
-      for (let [k,v] of Object.entries(this.abilities)) {
-        data[k] = foundry.utils.deepClone(v);
+    // Add aspects to roll data
+    data.aspects = Object.entries(this.aspects).reduce((acc, [key, value]) => {
+      acc[key] = value.modifier;
+      return acc;
+    }, {});
+
+    // Add skills to roll data
+    data.skills = {};
+    for (const [category, skills] of Object.entries(this.skills)) {
+      for (const [skillName, skill] of Object.entries(skills)) {
+        data.skills[`${category}.${skillName}`] = skill.total;
       }
     }
 
-    data.lvl = this.attributes.level.value;
-
-    return data
+    return data;
   }
 }
