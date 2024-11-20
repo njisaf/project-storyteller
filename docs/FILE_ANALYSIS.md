@@ -1,180 +1,118 @@
-# Project Storyteller File Analysis Todo List
+# Project Storyteller File Analysis
 
 ## Core System Files
-- [x] /home/ubuntu/repos/project-storyteller/system.json - Main system configuration file that defines:
-  * System identification (id: "project-storyteller", version: "2.0.0")
+- [x] system.json - Main system configuration file
+  * System identification (id: "project-storyteller", version: "0.2.4")
   * Foundry VTT compatibility (minimum: 11, verified: "11.315")
-  * Core file paths (esmodules, styles, languages)
-  * Token configuration (gridDistance: 5, gridUnits: "ft")
-  * Authors and metadata
-  * Dependencies:
-    - Referenced by module files for system data access
-    - Requires presence of lang/en.json, module/project-storyteller.mjs, css/project-storyteller.css
-  * Issues to Address:
-    - Placeholder values need updating (url, bugs, manifest, download)
-    - Verify all referenced files exist and paths are correct
-- [x] /home/ubuntu/repos/project-storyteller/template.json - Core type definition file that:
-  * Defines Actor types: "character" and "npc"
-  * Defines Item types: "item", "feature", and "spell"
-  * Related Implementation Files:
-    - Actor types implemented in module/data/actor-*.mjs files
-    - Item types implemented in module/data/item-*.mjs files
-  * UI Integration:
-    - Each type has corresponding template files in templates/actor/ and templates/item/
-  * System Architecture:
-    - Forms the foundation for the data model hierarchy
-    - Types are registered and managed through StorytellerActor and StorytellerItem classes
-- [x] /home/ubuntu/repos/project-storyteller/package.json - Build configuration and project metadata:
-  * Version Management:
-    - Current version: 2.0.0 (matches system.json)
-    - Need to ensure version consistency across all files
-  * Build System:
-    - SCSS compilation configured with expanded style
-    - Entry point: src/scss/project-storyteller.scss
-    - Output: css/project-storyteller.css
-  * Dependencies:
-    - Uses sass v1.53.0 for stylesheet compilation
-  * Scripts:
-    - build: Compiles SCSS without source maps
-    - watch: Compiles SCSS with source maps and file watching
-  * Project Info:
-    - Private package (not published to npm)
-    - MIT licensed
-    - Targets last 3 browser versions
-
-## Documentation Files
-- [x] /home/ubuntu/repos/project-storyteller/README.md - Primary project documentation:
-  * System Overview:
-    - Foundry VTT v11 compatible system
-    - Base system for custom development
-    - Similar to Simple World-building but with coded attributes
-  * Setup Methods:
-    - Generator CLI (requires Node.js v20+)
-    - Manual file renaming and updating
-    - Alternative Python-based generator available
-  * Features:
-    - Optional DataModel classes support
-    - Vue 3 version available (separate repo)
-    - Comprehensive CSS helper classes
-  * Development Resources:
-    - Official Foundry VTT Discord support
-    - Knowledge Base and API Documentation
-    - Tutorial available on Foundry Wiki
-  * Implementation Notes:
-    - Package naming requirements (alphanumeric-lowercase)
-    - SCSS compilation support
-    - Flexible sheet layout system
-- [x] /home/ubuntu/repos/project-storyteller/CHANGELOG.md - Version history tracking:
-  * Purpose:
-    - Documents system changes and updates
-    - Tracks version compatibility
-    - Records feature additions and bug fixes
-- [x] /home/ubuntu/repos/project-storyteller/LICENSE.txt - MIT License:
-  * Terms:
-    - Open source license terms
-    - Usage permissions and limitations
-    - Copyright information
+  * Core file paths and dependencies
+  * Token configuration
 
 ## JavaScript Modules
-- [x] /home/ubuntu/repos/project-storyteller/module/project-storyteller.mjs - Main system initialization module:
-  * Core Functionality:
-    - Imports and configures document classes (StorytellerActor, StorytellerItem)
-    - Sets up sheet classes for UI rendering
-    - Configures data models for characters, NPCs, and items
-    - Initializes combat and initiative systems
-  * System Configuration:
-    - Registers custom document classes and data models
-    - Disables legacy effect transferral
-    - Sets up initiative formula (1d20 + dex modifier)
-  * UI Integration:
-    - Registers actor and item sheets
-    - Preloads Handlebars templates
-    - Provides toLowerCase helper for templates
-  * Macro System:
-    - Implements item macro creation and rolling
-    - Handles hotbar integration
-  * Dependencies:
-    - Relies on multiple module imports from documents/, sheets/, helpers/, and data/
-    - Requires proper initialization order for system components
-- [x] /home/ubuntu/repos/project-storyteller/module/documents/actor.mjs - Core actor document class:
-  * Data Management:
-    - Extends base Foundry VTT Actor class
-    - Implements systematic data preparation lifecycle
-    - Handles derived data calculations
-  * Roll Data:
-    - Provides polymorphic roll data generation
-    - Combines base Actor roll data with system-specific data
-  * Data Serialization:
-    - Custom toPlainObject() method for data model compatibility
-    - Handles items and effects serialization
-  * System Integration:
-    - Uses projectstoryteller flags for system-specific data
-    - Supports character and NPC actor types
+
+### Core Modules
+- [x] module/project-storyteller.mjs - System initialization
+  * Registers document classes and sheets
+  * Configures data models and combat systems
+  * Handles Handlebars template preloading
+
+### Document Classes
+- [x] module/documents/actor.mjs - Actor document implementation
+  * Extends Foundry VTT Actor class
+  * Handles data preparation and roll mechanics
+  * Manages derived data calculations
+
+- [x] module/documents/item.mjs - Item document implementation
+  * Extends Foundry VTT Item class
+  * Implements roll mechanics and chat integration
+  * Manages item data serialization
+
+### Sheet Classes
+- [x] module/sheets/actor-sheet.mjs - Actor UI implementation
+  * Dynamic template selection by actor type
+  * Comprehensive item management
+  * Event handling for rolls and effects
+
+- [x] module/sheets/item-sheet.mjs - Item UI implementation
+  * Type-specific template rendering
+  * Active effect management
+  * Rich text description support
+
+### Helper Modules
+- [x] module/helpers/effects.mjs - Effect management
+  * Active effect processing and categorization
+  * UI integration for effect controls
+  * Effect state management
   * Implementation Notes:
-    - Follows Foundry VTT's data preparation sequence
-    - Maintains clear separation between base and derived data
-- [x] /home/ubuntu/repos/project-storyteller/module/documents/item.mjs - Core item document class:
-  * Data Management:
-    - Extends base Foundry VTT Item class
-    - Implements data preparation lifecycle
-    - Provides roll data generation
-  * Roll Mechanics:
-    - Handles clickable roll events
-    - Supports formula-based and description-only items
-    - Integrates with actor roll data when available
-  * Chat Integration:
-    - Creates formatted chat messages for items
-    - Supports different roll modes
-    - Includes item type and name in message labels
-  * Data Serialization:
-    - Custom toPlainObject() method for data model compatibility
-    - Handles effects serialization
+    - Comprehensive effect lifecycle handling
+    - Clear documentation of effect management methods
+    - Support for temporary and permanent effects
+
+- [x] module/helpers/templates.mjs - Template handling
+  * Handlebars template preloading
+  * Partial template organization
+  * Template caching system
   * Implementation Notes:
-    - Flexible roll data structure
-    - Clear separation between item and actor data
-    - Supports multiple item types (item, feature, spell)
-- [x] /home/ubuntu/repos/project-storyteller/module/sheets/actor-sheet.mjs - Actor sheet UI component:
-  * Sheet Configuration:
-    - Extends base Foundry VTT ActorSheet class
-    - Configures sheet dimensions and tabs
-    - Implements dynamic template selection based on actor type
-  * Data Management:
-    - Prepares actor data for rendering
-    - Organizes items into categories (gear, features, spells)
-    - Handles character-specific data preparation
-  * UI Interaction:
-    - Manages item creation, editing, and deletion
-    - Handles rollable abilities and drag-drop
-    - Processes active effect management
-  * Template Integration:
-    - Uses type-specific templates (character/npc)
-    - Enriches biography text with interactive elements
-    - Supports HTML-based event delegation
+    - Efficient template loading strategy
+    - Clear documentation of preload process
+    - Organized template structure
+
+- [x] module/helpers/config.mjs - System configuration
+  * Global configuration constants
+  * Ability score definitions
+  * Localization key management
   * Implementation Notes:
-    - Comprehensive event listener setup
-    - Clear separation of editable/non-editable functionality
-    - Supports macro creation through drag-drop
-- [x] /home/ubuntu/repos/project-storyteller/module/sheets/item-sheet.mjs - Item sheet UI component:
-  * Sheet Configuration:
-    - Extends base Foundry VTT ItemSheet class
-    - Configures sheet dimensions and tabs
-    - Implements dynamic template selection by item type
-  * Data Management:
-    - Prepares item data for rendering
-    - Enriches description text with interactive elements
-    - Handles active effect categories
-  * UI Interaction:
-    - Manages active effect controls
-    - Supports editable/non-editable states
-    - Provides template-specific functionality
-  * Template Integration:
-    - Uses type-specific templates (item/feature/spell)
-    - Supports alternative template strategies
-    - Maintains consistent path structure
+    - Centralized configuration management
+    - Well-documented configuration options
+    - Maintainable structure for future additions
+
+### Data Models
+- [x] module/data/_module.mjs - Data model entry point
+  * Centralizes model exports
+  * Organizes actor and item models
   * Implementation Notes:
-    - Focused event listener setup
-    - Rich text enrichment for descriptions
-    - Clear template organization pattern
+    - Clear documentation of export structure
+    - Organized import/export pattern
+    - Maintainable modular design
+
+- [x] module/data/base-model.mjs - Foundation model
+  * Extends TypeDataModel
+  * Implements serialization methods
+  * Provides common utilities
+
+- [x] module/data/base-actor.mjs - Actor base model
+  * Defines core actor attributes
+  * Implements aspect system
+  * Manages health and action points
+
+- [x] module/data/actor-character.mjs - Character model
+  * Implements character-specific fields
+  * Complex skill system implementation
+  * Roll data preparation
+
+- [x] module/data/actor-npc.mjs - NPC model
+  * Simplified actor structure
+  * Challenge rating system
+  * Experience point calculation
+
+- [x] module/data/base-item.mjs - Item base model
+  * Common item attributes
+  * Description field handling
+  * Base serialization methods
+
+- [x] module/data/item-item.mjs - General item model
+  * Inventory management fields
+  * Dynamic roll formula construction
+  * Weight and quantity tracking
+
+- [x] module/data/item-feature.mjs - Feature model
+  * Character ability implementation
+  * Extends base item structure
+  * Future-ready design
+
+- [x] module/data/item-spell.mjs - Spell model
+  * Spell level system
+  * Magic system integration
+  * Spell-specific attributes
 
 ## Templates
 - [x] /home/ubuntu/repos/project-storyteller/templates/actor/actor-character-sheet.hbs - Character sheet template:
@@ -310,5 +248,3 @@
     - Direct compilation from SCSS source
     - Maintains source organization
     - Production-ready styling
-
-Each file will be analyzed and documented below as we process them.

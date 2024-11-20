@@ -1,7 +1,19 @@
 /**
- * Define a set of template paths to pre-load
- * Pre-loaded templates are compiled and cached for fast access when rendering
- * @return {Promise}
+ * @module helpers/templates
+ * @description Manages preloading and caching of Handlebars templates for Project Storyteller
+ */
+
+/**
+ * @function preloadHandlebarsTemplates
+ * @description Preloads and caches Handlebars template partials for faster rendering
+ * @returns {Promise} Promise that resolves when all templates are loaded
+ * @example
+ * // Usage in init hook:
+ * Hooks.once('init', async function() {
+ *   await preloadHandlebarsTemplates();
+ * });
+ *
+ * @see {@link https://foundryvtt.wiki/en/development/api/handlebars} FoundryVTT Handlebars Documentation
  */
 export const preloadHandlebarsTemplates = async function () {
   return loadTemplates([

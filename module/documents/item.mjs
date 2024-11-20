@@ -1,10 +1,15 @@
 /**
- * Extend the basic Item with some very simple modifications.
+ * @class StorytellerItem
  * @extends {Item}
+ * @description Extends the base Item document for Project Storyteller system.
+ * Implements custom roll handling and data preparation methods.
+ * @see {@link https://foundryvtt.wiki/en/development/api/item} FoundryVTT Item Documentation
  */
 export class StorytellerItem extends Item {
   /**
-   * Augment the basic Item data model with additional dynamic data.
+   * @override
+   * @description Augments the basic Item data model with additional dynamic data.
+   * Follows the standard document data preparation workflow.
    */
   prepareData() {
     // As with the actor class, items are documents that can have their data
@@ -13,8 +18,11 @@ export class StorytellerItem extends Item {
   }
 
   /**
-   * Prepare a data object which defines the data schema used by dice roll commands against this Item
    * @override
+   * @description Prepares roll data for dice commands against this Item
+   * @returns {Object} Roll data object containing:
+   * - Shallow copy of item's system data
+   * - Actor's roll data (if item is owned by an actor)
    */
   getRollData() {
     // Starts off by populating the roll data with a shallow copy of `this.system`
@@ -51,11 +59,19 @@ export class StorytellerItem extends Item {
   }
 
   /**
-   * Handle clickable rolls.
-   * @param {Event} event   The originating click event
-   * @private
+   * @description Handles item rolls, creating appropriate chat messages
+   * @returns {Promise<Roll|void>} Returns Roll object if formula exists, void otherwise
+   * @example
+   * ```javascript
+   * const item = actor.items.getName("Sword");
+   * await item.roll(); // Rolls the item and creates chat message
+   * ```
    */
   async roll() {
+    /**
+     * @type {StorytellerItem}
+     * @description Reference to the item being rolled
+     */
     const item = this;
 
     // Initialize chat data.
