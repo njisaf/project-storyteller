@@ -1,6 +1,25 @@
+/**
+ * @module data/base-actor
+ * @description Base actor data model for Project Storyteller system
+ */
+
 import StorytellerDataModel from "./base-model.mjs";
 
+/**
+ * @class StorytellerActorBase
+ * @extends {StorytellerDataModel}
+ * @description Foundation class for all actor types in Project Storyteller
+ * Defines common attributes and methods shared across all actors
+ */
 export default class StorytellerActorBase extends StorytellerDataModel {
+  /**
+   * @static
+   * @returns {Object} Schema definition for actor data
+   * @description Defines the data schema for actor documents, including:
+   * - Aspects (Focus, Grace, Intellect, Might)
+   * - Health tracking
+   * - Action Points management
+   */
   static defineSchema() {
     const fields = foundry.data.fields;
     const requiredInteger = { required: true, nullable: false, integer: true };
@@ -38,11 +57,14 @@ export default class StorytellerActorBase extends StorytellerDataModel {
     return schema;
   }
 
+  /**
+   * @override
+   * @description Calculates derived values for actor data
+   * Currently computes aspect modifiers as floor(value/3)
+   */
   prepareDerivedData() {
     for (const [aspect, data] of Object.entries(this.aspects)) {
       data.modifier = Math.floor(data.value / 3);
     }
   }
 }
-
-

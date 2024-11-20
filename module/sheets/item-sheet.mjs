@@ -1,14 +1,29 @@
+/**
+ * @module sheets/item-sheet
+ */
+
 import {
   onManageActiveEffect,
   prepareActiveEffectCategories,
 } from '../helpers/effects.mjs';
 
 /**
- * Extend the basic ItemSheet with some very simple modifications
+ * @class StorytellerItemSheet
  * @extends {ItemSheet}
+ * @description Item sheet (item interface) implementation for Project Storyteller.
+ * Provides the interface for viewing and editing item data.
+ * @see {@link https://foundryvtt.wiki/en/development/api/sheets} FoundryVTT Sheet Documentation
  */
 export class StorytellerItemSheet extends ItemSheet {
-  /** @override */
+  /**
+   * @override
+   * @static
+   * @returns {Object} Default options for the item sheet
+   * @property {Array} classes - CSS classes applied to the sheet
+   * @property {number} width - Default sheet width
+   * @property {number} height - Default sheet height
+   * @property {Array} tabs - Tab configuration for the sheet
+   */
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ['project-storyteller', 'sheet', 'item'],
@@ -24,7 +39,14 @@ export class StorytellerItemSheet extends ItemSheet {
     });
   }
 
-  /** @override */
+  /**
+   * @override
+   * @returns {string} Path to the item sheet template
+   * @description Returns a type-specific template path for different item types
+   * @example
+   * // For an item of type "weapon"
+   * // Returns: "systems/project-storyteller/templates/item/item-weapon-sheet.hbs"
+   */
   get template() {
     const path = 'systems/project-storyteller/templates/item';
     // Return a single sheet for all item types.
@@ -37,7 +59,16 @@ export class StorytellerItemSheet extends ItemSheet {
 
   /* -------------------------------------------- */
 
-  /** @override */
+  /**
+   * @override
+   * @async
+   * @returns {Object} Data object to be passed to the sheet template
+   * @description Prepares data for the item sheet template, including:
+   * - Basic item data and flags
+   * - Enriched HTML description
+   * - Active effects categorized for display
+   * - System configuration reference
+   */
   async getData() {
     // Retrieve base data structure.
     const context = super.getData();
@@ -76,7 +107,12 @@ export class StorytellerItemSheet extends ItemSheet {
 
   /* -------------------------------------------- */
 
-  /** @override */
+  /**
+   * @override
+   * @param {jQuery} html - The rendered HTML of the sheet
+   * @description Activates event listeners for the item sheet
+   * @listens click.effect-control - Manages active effects
+   */
   activateListeners(html) {
     super.activateListeners(html);
 

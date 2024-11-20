@@ -1,7 +1,26 @@
+/**
+ * @module data/actor-character
+ * @description Character-specific data model implementation for Project Storyteller
+ */
 
 import StorytellerActorBase from "./base-actor.mjs";
 
+/**
+ * @class StorytellerCharacter
+ * @extends {StorytellerActorBase}
+ * @description Data model for player character actors, implementing character-specific
+ * attributes and mechanics including skills, background elements, and derived calculations
+ */
 export default class StorytellerCharacter extends StorytellerActorBase {
+  /**
+   * @static
+   * @returns {Object} Schema definition for character-specific data
+   * @description Defines the data schema for character documents, including:
+   * - Background fields (descent, culture, vocation, role)
+   * - Biography text
+   * - Skill categories (combat, social, investigative, magical)
+   * Each skill includes value, aptitude, and associated aspect
+   */
   static defineSchema() {
     const fields = foundry.data.fields;
     const requiredInteger = { required: true, nullable: false, integer: true };
@@ -87,6 +106,12 @@ export default class StorytellerCharacter extends StorytellerActorBase {
     return schema;
   }
 
+  /**
+   * @override
+   * @description Calculates derived values for character data:
+   * - Calls parent class calculations
+   * - Computes total skill values (value + aptitude + aspect modifier)
+   */
   prepareDerivedData() {
     super.prepareDerivedData();
 
@@ -99,6 +124,14 @@ export default class StorytellerCharacter extends StorytellerActorBase {
     }
   }
 
+  /**
+   * @returns {Object} Formatted data object for roll calculations
+   * @description Prepares character data for use in roll formulas:
+   * - Extracts aspect modifiers
+   * - Formats skill totals with category prefixes
+   * @example
+   * // Returns object like: { aspects: { might: 2 }, skills: { "combat.melee": 5 } }
+   */
   getRollData() {
     const data = {};
 

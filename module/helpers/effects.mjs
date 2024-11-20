@@ -1,7 +1,16 @@
 /**
+ * @module helpers/effects
+ * @description Provides utility functions for managing Active Effects in Project Storyteller
+ */
+
+/**
  * Manage Active Effect instances through an Actor or Item Sheet via effect control buttons.
  * @param {MouseEvent} event      The left-click event on the effect control
  * @param {Actor|Item} owner      The owning document which manages this effect
+ * @throws {Error} If effect creation/deletion fails
+ * @example
+ * // HTML: <a class="effect-control" data-action="create">
+ * html.on('click', '.effect-control', ev => onManageActiveEffect(ev, actor));
  */
 export function onManageActiveEffect(event, owner) {
   event.preventDefault();
@@ -36,7 +45,13 @@ export function onManageActiveEffect(event, owner) {
 /**
  * Prepare the data structure for Active Effects which are currently embedded in an Actor or Item.
  * @param {ActiveEffect[]} effects    A collection or generator of Active Effect documents to prepare sheet data for
- * @return {object}                   Data for rendering
+ * @returns {Object} Categorized effects object containing:
+ * @property {Object} temporary - Temporary effects category
+ * @property {Object} passive - Passive effects category
+ * @property {Object} inactive - Inactive effects category
+ * @example
+ * const categories = prepareActiveEffectCategories(actor.effects);
+ * // Use in templates: {{#each effects.temporary.effects}}
  */
 export function prepareActiveEffectCategories(effects) {
   // Define effect header categories

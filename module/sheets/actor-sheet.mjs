@@ -1,14 +1,29 @@
+/**
+ * @module sheets/actor-sheet
+ */
+
 import {
   onManageActiveEffect,
   prepareActiveEffectCategories,
 } from '../helpers/effects.mjs';
 
 /**
- * Extend the basic ActorSheet with some very simple modifications
+ * @class StorytellerActorSheet
  * @extends {ActorSheet}
+ * @description Actor sheet (character sheet) implementation for Project Storyteller.
+ * Provides the interface for viewing and editing actor data.
+ * @see {@link https://foundryvtt.wiki/en/development/api/sheets} FoundryVTT Sheet Documentation
  */
 export class StorytellerActorSheet extends ActorSheet {
-  /** @override */
+  /**
+   * @override
+   * @static
+   * @returns {Object} Default options for the actor sheet
+   * @property {Array} classes - CSS classes applied to the sheet
+   * @property {number} width - Default sheet width
+   * @property {number} height - Default sheet height
+   * @property {Array} tabs - Tab configuration for the sheet
+   */
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ['project-storyteller', 'sheet', 'actor'],
@@ -24,7 +39,11 @@ export class StorytellerActorSheet extends ActorSheet {
     });
   }
 
-  /** @override */
+  /**
+   * @override
+   * @returns {string} Path to the actor sheet template
+   * @description Dynamically returns the appropriate template based on actor type
+   */
   get template() {
     console.log("🚀 ~ StorytellerActorSheet ~ gettemplate ~ this.actor.type:", this.actor.type)
     return `systems/project-storyteller/templates/actor/actor-${this.actor.type}-sheet.hbs`;
@@ -32,7 +51,16 @@ export class StorytellerActorSheet extends ActorSheet {
 
   /* -------------------------------------------- */
 
-  /** @override */
+  /**
+   * @override
+   * @async
+   * @returns {Object} Data object to be passed to the sheet template
+   * @description Prepares data for the actor sheet template, including:
+   * - Basic actor data and flags
+   * - Prepared items sorted by category
+   * - Enriched HTML content
+   * - Active effects categorized for display
+   */
   async getData() {
     // Retrieve the data structure from the base sheet. You can inspect or log
     // the context variable to see the structure, but some key properties for
@@ -98,9 +126,9 @@ export class StorytellerActorSheet extends ActorSheet {
   }
 
   /**
-   * Character-specific context modifications
-   *
-   * @param {object} context The context object to mutate
+   * @private
+   * @param {Object} context - The data context being prepared
+   * @description Prepares character-specific data for the sheet
    */
   _prepareCharacterData(context) {
     // This is where you can enrich character-specific editor fields
@@ -108,9 +136,10 @@ export class StorytellerActorSheet extends ActorSheet {
   }
 
   /**
-   * Organize and classify Items for Actor sheets.
-   *
-   * @param {object} context The context object to mutate
+   * @private
+   * @param {Object} context - The data context being prepared
+   * @description Organizes items into categories (gear, features, spells)
+   * for easier template rendering and management
    */
   _prepareItems(context) {
     // Initialize containers.
@@ -156,7 +185,16 @@ export class StorytellerActorSheet extends ActorSheet {
 
   /* -------------------------------------------- */
 
-  /** @override */
+  /**
+   * @override
+   * @param {jQuery} html - The rendered HTML of the sheet
+   * @description Activates event listeners for the actor sheet
+   * @listens click.item-edit - Opens item sheet for editing
+   * @listens click.item-create - Creates new item
+   * @listens click.item-delete - Deletes existing item
+   * @listens click.effect-control - Manages active effects
+   * @listens click.rollable - Handles ability/item rolls
+   */
   activateListeners(html) {
     super.activateListeners(html);
 
@@ -207,9 +245,11 @@ export class StorytellerActorSheet extends ActorSheet {
   }
 
   /**
-   * Handle creating a new Owned Item for the actor using initial data defined in the HTML dataset
-   * @param {Event} event   The originating click event
    * @private
+   * @async
+   * @param {Event} event - The originating click event
+   * @returns {Promise<Item>} The newly created item
+   * @description Creates a new item owned by the actor
    */
   async _onItemCreate(event) {
     event.preventDefault();
@@ -234,9 +274,11 @@ export class StorytellerActorSheet extends ActorSheet {
   }
 
   /**
-   * Handle clickable rolls.
-   * @param {Event} event   The originating click event
    * @private
+   * @param {Event} event - The originating click event
+   * @returns {Promise<Roll>} The roll result if applicable
+   * @description Handles clickable rolls from the character sheet
+   * Supports both item rolls and direct formula rolls
    */
   _onRoll(event) {
     event.preventDefault();
