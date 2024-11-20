@@ -100,19 +100,20 @@ export class StorytellerActorSheet extends ActorSheet {
 
     // Enrich biography info for display
     // Enrichment turns text like `[[/r 1d20]]` into buttons
-    context.enrichedBiography = await TextEditor.enrichHTML(
-      this.actor.system.biography,
-      {
-        // Whether to show secret blocks in the finished html
+    try {
+      const rollData = this.actor.getRollData() || {};
+      const biography = this.actor.system?.biography || '';
+
+      context.enrichedBiography = await TextEditor.enrichHTML(biography, {
         secrets: this.document.isOwner,
-        // Necessary in v11, can be removed in v12
         async: true,
-        // Data to fill in for inline rolls
-        rollData: this.actor.getRollData(),
-        // Relative UUID resolution
+        rollData,
         relativeTo: this.actor,
-      }
-    );
+      });
+    } catch (error) {
+      console.error("Error enriching biography:", error);
+      context.enrichedBiography = this.actor.system?.biography || '';
+    }
 
     // Prepare active effects
     context.effects = prepareActiveEffectCategories(
