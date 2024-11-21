@@ -84,9 +84,9 @@ A tabletop roleplaying game system for Foundry VTT that emphasizes narrative gam
 
 ### Helper Modules
 - `module/helpers/` - Utility functions:
-  * Effects management
-  * Template handling
-  * System configuration
+  * `effects.ts` - Active Effect management and categorization
+  * `templates.ts` - Template preloading and registration
+  * `config.ts` - System configuration and settings
 
 ### Templates
 - `templates/actor/` - Actor sheet layouts
