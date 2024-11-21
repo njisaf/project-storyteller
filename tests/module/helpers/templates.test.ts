@@ -1,13 +1,15 @@
 import { preloadHandlebarsTemplates } from '../../../module/helpers/templates';
 
 declare global {
-  var loadTemplates: jest.Mock<Promise<void>, [string[]]>;
+  const loadTemplates: jest.Mock<Promise<void>, [string[]]>;
 }
 
 describe('Template Helper', () => {
-  beforeAll(() => {
-    // Mock global loadTemplates function
-    global.loadTemplates = jest.fn().mockResolvedValue(undefined);
+  let mockLoadTemplates: jest.Mock;
+
+  beforeEach(() => {
+    mockLoadTemplates = jest.fn().mockResolvedValue(undefined);
+    (global as any).loadTemplates = mockLoadTemplates;
   });
 
   it('preloads all required templates', async () => {

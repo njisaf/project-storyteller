@@ -3,6 +3,10 @@
  * @description Manages preloading and caching of Handlebars templates for Project Storyteller
  */
 
+declare global {
+  var loadTemplates: (paths: string[]) => Promise<void>;
+}
+
 /**
  * List of template paths to be preloaded
  */

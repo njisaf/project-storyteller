@@ -6,14 +6,30 @@ describe("StorytellerItemBase", () => {
   let item: StorytellerItemBase;
 
   beforeEach(() => {
-    item = new StorytellerItemBase({
-      _source: {
-        description: "Test item description"
-      }
-    } as any, {});
+    // Mock foundry.data.fields
+    const mockSchemaField = jest.fn().mockImplementation((data) => data);
+    const mockStringField = jest.fn().mockImplementation(() => ({
+      initial: '',
+      options: { required: true, blank: true }
+    }));
 
-    // Ensure the data is accessible on the instance
-    Object.assign(item, item._source);
+    global.foundry = {
+      data: {
+        fields: {
+          SchemaField: mockSchemaField,
+          StringField: mockStringField
+        }
+      }
+    };
+
+    // Create mock data
+    const mockData = {
+      description: "Test item description"
+    };
+
+    // @ts-ignore - Mock constructor
+    item = new StorytellerItemBase();
+    Object.assign(item, mockData);
   });
 
   describe("schema", () => {

@@ -34,13 +34,20 @@ interface ActiveEffect {
 }
 
 /**
+ * Type guard to check if effects is a Collection
+ */
+function isCollection(effects: foundry.utils.Collection<ActiveEffect> | ActiveEffect[]): effects is foundry.utils.Collection<ActiveEffect> {
+  return 'get' in effects;
+}
+
+/**
  * @typedef {Object} EffectOwner
- * @property {foundry.utils.Collection<ActiveEffect>|ActiveEffect[]} effects - Collection or array of active effects
+ * @property {foundry.utils.Collection<ActiveEffect>} effects - Collection of active effects
  * @property {Function} createEmbeddedDocuments - Method to create new embedded documents
  * @property {string} uuid - Unique identifier for the effect owner
  */
 export interface EffectOwner {
-  effects: foundry.utils.Collection<ActiveEffect> | ActiveEffect[];
+  effects: foundry.utils.Collection<ActiveEffect>;
   createEmbeddedDocuments: (type: string, data: object[]) => Promise<ActiveEffect[]>;
   uuid: string;
 }
@@ -116,7 +123,7 @@ export function prepareActiveEffectCategories(effects: foundry.utils.Collection<
     },
   };
 
-  const effectsArray = Array.isArray(effects) ? effects : Array.from(effects.values());
+  const effectsArray = isCollection(effects) ? Array.from(effects.values()) : effects;
 
   for (const e of effectsArray) {
     if (e.disabled) categories.inactive.effects.push(e);

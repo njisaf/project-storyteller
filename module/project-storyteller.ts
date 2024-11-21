@@ -8,21 +8,41 @@ import { StorytellerActorSheet } from './sheets/actor-sheet';
 import { StorytellerItemSheet } from './sheets/item-sheet';
 import { preloadHandlebarsTemplates } from './helpers/templates';
 import { PROJECT_STORYTELLER } from './helpers/config';
-import * as models from './data/_module';
+import { StorytellerCharacter, StorytellerNPC, StorytellerItem as StorytellerItemModel, StorytellerFeature, StorytellerSpell } from './data/_module';
 
 declare global {
+  namespace foundry {
+    interface Collection<T> {
+      find: (predicate: (item: T) => boolean) => T | undefined;
+    }
+
+    interface DataModel {
+      _source: Record<string, unknown>;
+      toObject(): Record<string, unknown>;
+      toPlainObject(): Record<string, unknown>;
+      prepareDerivedData(): void;
+    }
+
+    interface DocumentSheet {
+      defaultOptions: Record<string, unknown>;
+    }
+  }
+
+  interface ActorSheet extends foundry.DocumentSheet {}
+  interface ItemSheet extends foundry.DocumentSheet {}
+
   interface Game {
     projectstoryteller: {
       StorytellerActor: typeof StorytellerActor;
       StorytellerItem: typeof StorytellerItem;
       rollItemMacro: (itemUuid: string) => void;
     };
-    macros: Collection<Macro>;
+    macros: foundry.utils.Collection<Macro>;
     user: User;
   }
 
   interface CONFIG {
-    PROJECT_STORYTELLER: typeof PROJECT_STORYTELLER;
+    PROJECT_STORYTELLER: ProjectStoryteller;
     Combat: {
       initiative: {
         formula: string;
@@ -32,16 +52,16 @@ declare global {
     Actor: {
       documentClass: typeof StorytellerActor;
       dataModels: {
-        character: unknown;
-        npc: unknown;
+        character: typeof StorytellerCharacter;
+        npc: typeof StorytellerNPC;
       };
     };
     Item: {
       documentClass: typeof StorytellerItem;
       dataModels: {
-        item: unknown;
-        feature: unknown;
-        spell: unknown;
+        item: typeof StorytellerItemModel;
+        feature: typeof StorytellerFeature;
+        spell: typeof StorytellerSpell;
       };
     };
     ActiveEffect: {
@@ -67,12 +87,12 @@ declare global {
     ) => void;
   }
 
-  interface Item {
-    fromDropData: (data: { type: string; uuid: string }) => Promise<StorytellerItem>;
-    parent?: unknown;
-    name?: string;
-    img?: string;
-    roll: () => void;
+  interface Item extends foundry.DataModel {
+    fromDropData(data: { type: string; uuid: string }): Promise<Item>;
+    parent: Actor | null;
+    name: string;
+    img: string;
+    roll(): Promise<Roll>;
   }
 
   interface Macro {
@@ -130,15 +150,15 @@ Hooks.once('init', async function() {
 
   CONFIG.Actor.documentClass = StorytellerActor;
   CONFIG.Actor.dataModels = {
-    character: models.StorytellerCharacter,
-    npc: models.StorytellerNPC
+    character: StorytellerCharacter,
+    npc: StorytellerNPC
   };
 
   CONFIG.Item.documentClass = StorytellerItem;
   CONFIG.Item.dataModels = {
-    item: models.StorytellerItem,
-    feature: models.StorytellerFeature,
-    spell: models.StorytellerSpell
+    item: StorytellerItemModel,
+    feature: StorytellerFeature,
+    spell: StorytellerSpell
   };
 
   CONFIG.ActiveEffect.legacyTransferral = false;
@@ -165,7 +185,7 @@ Handlebars.registerHelper('toLowerCase', function(str: string) {
 
 // Initialize hotbar macros
 Hooks.once('ready', function() {
-  Hooks.on('hotbarDrop', (bar, data, slot) => createItemMacro(data, slot));
+  Hooks.on('hotbarDrop', (_bar, data, slot) => createItemMacro(data, slot));
 });
 
 async function createItemMacro(data: { type: string; uuid: string }, slot: number): Promise<boolean> {
@@ -175,7 +195,6 @@ async function createItemMacro(data: { type: string; uuid: string }, slot: numbe
     ui.notifications.warn('You can only create macro buttons for owned Items');
     return false;
   }
-
 
   const item = await Item.fromDropData(data);
   const command = `game.projectstoryteller.rollItemMacro("${data.uuid}");`;

@@ -1,44 +1,84 @@
-import { onManageActiveEffect, prepareActiveEffectCategories } from '../helpers/effects';
+import { onManageActiveEffect, prepareActiveEffectCategories, EffectOwner as EffectsModuleOwner } from '../helpers/effects';
+import '@types/jquery';
 
+// Utility functions and type declarations
 declare global {
-  interface JQuery {
-    slideUp: (duration: number, callback: () => void) => void;
-    parents: (selector: string) => JQuery;
-    data: (key: string) => any;
-    find: (selector: string) => JQuery;
-    each: (callback: (index: number, element: HTMLElement) => void) => void;
-    on: (event: string, selector: string, callback: (event: JQuery.ClickEvent) => void) => void;
+  interface String {
+    capitalize(): string;
   }
 
-  interface HTMLElement {
-    dataset: DOMStringMap;
-    classList: {
-      contains: (className: string) => boolean;
-    };
+  interface DocumentSheet {
+    getData(): Promise<Record<string, unknown>>;
   }
+
+  class DocumentSheetClass extends DocumentSheet {
+    static get defaultOptions(): DocumentSheet.Options;
+  }
+
+  namespace DocumentSheet {
+    interface Options {
+      classes?: string[];
+      width?: number;
+      height?: number;
+      tabs?: {
+        navSelector: string;
+        contentSelector: string;
+        initial: string;
+      }[];
+    }
+  }
+
+  namespace foundry {
+    namespace utils {
+      function duplicate<T>(original: T): T;
+      function mergeObject<T>(original: T, other: Partial<T>): T;
+    }
+
+    interface Collection<T> {
+      get(key: string): T | undefined;
+      values(): IterableIterator<T>;
+    }
+  }
+}
+
+interface StorytellerActorSheetData extends Record<string, unknown> {
+  actor: Actor;
+  data: Record<string, unknown>;
+  items: Item[];
+  system: Record<string, unknown>;
+  flags: Record<string, unknown>;
+  cssClass: string;
+  config: typeof CONFIG.PROJECT_STORYTELLER;
+  effects: ReturnType<typeof prepareActiveEffectCategories>;
+  enrichedBiography?: string;
+  gear?: Item[];
+  features?: Item[];
+  spells?: Record<number, Item[]>;
+}
+
+function isEffectOwner(obj: unknown): obj is EffectsModuleOwner {
+  return obj !== null &&
+         typeof obj === 'object' &&
+         'effects' in obj &&
+         'createEmbeddedDocuments' in obj &&
+         'uuid' in obj;
 }
 
 /**
  * Actor sheet implementation for Project Storyteller
- * @extends {ActorSheet}
+ * @extends {DocumentSheetClass}
  */
-export class StorytellerActorSheet extends (globalThis as any).ActorSheet {
-  actor!: Actor;
-  document!: Actor;
-  isEditable!: boolean;
+export class StorytellerActorSheet extends DocumentSheetClass {
+  declare actor: Actor;
+  declare document: Actor & EffectsModuleOwner;
+  declare isEditable: boolean;
 
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
+  static get defaultOptions(): DocumentSheet.Options {
+    return foundry.utils.mergeObject(super.defaultOptions as DocumentSheet.Options, {
       classes: ['project-storyteller', 'sheet', 'actor'],
       width: 600,
       height: 600,
-      tabs: [
-        {
-          navSelector: '.sheet-tabs',
-          contentSelector: '.sheet-body',
-          initial: 'features',
-        },
-      ],
+      tabs: [{ navSelector: '.sheet-tabs', contentSelector: '.sheet-body', initial: 'features' }],
     });
   }
 
@@ -46,26 +86,28 @@ export class StorytellerActorSheet extends (globalThis as any).ActorSheet {
     return `systems/project-storyteller/templates/actor/actor-${this.actor.type}-sheet.hbs`;
   }
 
-  async getData(): Promise<Record<string, unknown>> {
-    const context = await super.getData();
-
-    if (!context || !context.data) {
-      console.error("Context data is missing.");
-    }
-
+  async getData(): Promise<StorytellerActorSheetData> {
+    const baseContext = await super.getData();
+    const actorItems = Array.from(this.actor.items.values());
     const actorData = this.document.toObject();
 
-    context.system = actorData.system;
-    context.flags = actorData.flags;
-    context.cssClass = 'storyteller-character-sheet';
-    context.config = CONFIG.PROJECT_STORYTELLER;
+    const context: StorytellerActorSheetData = {
+      actor: this.actor,
+      data: baseContext.data as Record<string, unknown>,
+      items: actorItems,
+      system: actorData.system as Record<string, unknown>,
+      flags: actorData.flags as Record<string, unknown>,
+      cssClass: 'storyteller-character-sheet',
+      config: CONFIG.PROJECT_STORYTELLER,
+      effects: prepareActiveEffectCategories([...this.actor.allApplicableEffects()]),
+    };
 
-    if (actorData.type == 'character') {
+    if (this.document.type === 'character') {
       this._prepareItems(context);
       this._prepareCharacterData(context);
     }
 
-    if (actorData.type == 'npc') {
+    if (this.document.type === 'npc') {
       this._prepareItems(context);
     }
 
@@ -84,31 +126,35 @@ export class StorytellerActorSheet extends (globalThis as any).ActorSheet {
       context.enrichedBiography = this.actor.system?.biography || '';
     }
 
-    context.effects = prepareActiveEffectCategories(this.actor.allApplicableEffects());
-
     return context;
   }
 
-  private _prepareCharacterData(context: Record<string, unknown>): void {
-    // Character-specific data preparation
+  private _prepareCharacterData(_context: StorytellerActorSheetData): void {
+    // Character-specific data preparation will be implemented later
   }
 
-  private _prepareItems(context: { items: Item[] } & Record<string, unknown>): void {
+  private _prepareItems(context: StorytellerActorSheetData): void {
     const gear: Item[] = [];
     const features: Item[] = [];
     const spells: Record<number, Item[]> = {
       0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: []
     };
 
-    for (const i of context.items) {
-      i.img = i.img || Item.DEFAULT_ICON;
+    for (const item of context.items) {
+      if (!item) continue;
 
-      if (i.type === 'item') {
-        gear.push(i);
-      } else if (i.type === 'feature') {
-        features.push(i);
-      } else if (i.type === 'spell' && i.system.spellLevel !== undefined) {
-        spells[i.system.spellLevel].push(i);
+      const itemImg = item.img || Item.DEFAULT_ICON;
+      Object.defineProperty(item, 'img', { value: itemImg, writable: true });
+
+      if (item.type === 'item') {
+        gear.push(item);
+      } else if (item.type === 'feature') {
+        features.push(item);
+      } else if (item.type === 'spell' && 'spellLevel' in item.system) {
+        const level = item.system.spellLevel as number;
+        if (level >= 0 && level <= 9) {
+          spells[level].push(item);
+        }
       }
     }
 
@@ -143,14 +189,16 @@ export class StorytellerActorSheet extends (globalThis as any).ActorSheet {
       const document = row.dataset.parentId === this.actor.id
         ? this.actor
         : this.actor.items.get(row.dataset.parentId);
-      onManageActiveEffect(ev, document);
+      if (document && isEffectOwner(document)) {
+        onManageActiveEffect(ev as unknown as MouseEvent, document);
+      }
     });
 
     html.on('click', '.rollable', this._onRoll.bind(this));
 
     if (this.actor.isOwner) {
       const handler = (ev: DragEvent) => this._onDragStart(ev);
-      html.find('li.item').each((i, li) => {
+      html.find('li.item').each((_i, li) => {
         if (li.classList.contains('inventory-header')) return;
         li.setAttribute('draggable', 'true');
         li.addEventListener('dragstart', handler, false);
@@ -162,7 +210,7 @@ export class StorytellerActorSheet extends (globalThis as any).ActorSheet {
     event.preventDefault();
     const header = event.currentTarget as HTMLElement;
     const type = header.dataset.type;
-    const data = duplicate(header.dataset);
+    const data = foundry.utils.duplicate(header.dataset);
     const name = `New ${(type as string).capitalize()}`;
 
     const itemData = {
@@ -180,9 +228,9 @@ export class StorytellerActorSheet extends (globalThis as any).ActorSheet {
     const element = event.currentTarget as HTMLElement;
     const dataset = element.dataset;
 
-    if (dataset.rollType) {
-      if (dataset.rollType === 'item') {
-        const itemId = (element.closest('.item') as HTMLElement)?.dataset.itemId;
+    if (dataset.rollType === 'item') {
+      const itemId = (element.closest('.item') as HTMLElement)?.dataset.itemId;
+      if (itemId) {
         const item = this.actor.items.get(itemId);
         if (item?.roll) return item.roll();
       }
@@ -197,6 +245,23 @@ export class StorytellerActorSheet extends (globalThis as any).ActorSheet {
         rollMode: game.settings.get('core', 'rollMode'),
       });
       return roll;
+    }
+
+    return undefined;
+  }
+
+  protected _onDragStart(event: DragEvent): void {
+    const li = event.currentTarget as HTMLElement;
+    if (li.dataset.itemId) {
+      const item = this.actor.items.get(li.dataset.itemId);
+      if (item) {
+        const dragData = {
+          type: "Item",
+          uuid: item.uuid,
+          data: item.toObject()
+        };
+        event.dataTransfer?.setData("text/plain", JSON.stringify(dragData));
+      }
     }
   }
 }

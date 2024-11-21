@@ -23,7 +23,16 @@ declare module '../types/base' {
   }
 
   interface EffectOwner {
-    effects: ActiveEffect[];
+    effects: foundry.utils.Collection<ActiveEffect>;
+    createEmbeddedDocuments(type: string, data: object[]): Promise<ActiveEffect[]>;
+    uuid: string;
+  }
+
+  export interface DataModel {
+    _source: Record<string, unknown>;
+    toObject(): Record<string, unknown>;
+    toPlainObject(): Record<string, unknown>;
+    prepareDerivedData(): void;
   }
 
   export interface Item extends DocumentData, EffectOwner {
@@ -31,20 +40,36 @@ declare module '../types/base' {
     type: string;
     name: string;
     img: string;
-    system: {
-      description?: string;
-      spellLevel?: number;
-      [key: string]: any;
+    system: StorytellerItemData & {
+      description: string;
+      quantity?: number;
+      weight?: number;
+      requirements?: string;
     };
     flags: Record<string, unknown>;
     isOwner: boolean;
-    effects: ActiveEffect[];
+    effects: foundry.utils.Collection<ActiveEffect>;
     getRollData(): Record<string, unknown>;
     toObject(): Record<string, unknown>;
     sheet: ItemSheet;
     parent: Actor | null;
     delete(): Promise<void>;
     roll(): Promise<Roll>;
+  }
+
+  export interface Actor extends DocumentData, EffectOwner {
+    system: StorytellerActorData & {
+      aspects: {
+        focus: { value: number; modifier: number };
+        grace: { value: number; modifier: number };
+        intellect: { value: number; modifier: number };
+        might: { value: number; modifier: number };
+      };
+    };
+    items: foundry.utils.Collection<Item>;
+    effects: foundry.utils.Collection<ActiveEffect>;
+    isOwner: boolean;
+    getRollData(): Record<string, unknown>;
   }
 
   interface ActiveEffect {
@@ -59,6 +84,12 @@ declare module '../types/base' {
     origin: string | null;
     tint: string | null;
     statuses: Set<string>;
+    isTemporary: boolean;
+    sheet: {
+      render: (force: boolean) => void;
+    };
+    delete(): Promise<void>;
+    update(data: Partial<ActiveEffect>): Promise<void>;
   }
 
   export const TextEditor: {

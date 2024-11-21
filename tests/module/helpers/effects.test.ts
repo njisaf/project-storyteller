@@ -1,4 +1,4 @@
-import { onManageActiveEffect, prepareActiveEffectCategories } from "../../../module/helpers/effects";
+import { onManageActiveEffect, prepareActiveEffectCategories, EffectOwner } from "../../../module/helpers/effects";
 
 interface MockEffectData extends ActiveEffect {
   id: string;
@@ -7,10 +7,11 @@ interface MockEffectData extends ActiveEffect {
   update: jest.Mock;
 }
 
-class MockCollection<T> implements foundry.utils.Collection<T> {
+class MockCollection<T> extends foundry.utils.Collection<T> {
   private map: Map<string, T>;
 
   constructor(entries?: [string, T][]) {
+    super();
     this.map = new Map(entries);
   }
 
@@ -27,8 +28,8 @@ class MockCollection<T> implements foundry.utils.Collection<T> {
     return this.map.values();
   }
 
-  [Symbol.iterator](): IterableIterator<T> {
-    return this.values();
+  [Symbol.iterator](): IterableIterator<[string, T]> {
+    return this.map.entries();
   }
 
   toArray(): T[] {
@@ -52,10 +53,10 @@ describe("Effect Helpers", () => {
     };
 
     mockOwner = {
-      effects: new MockCollection<ActiveEffect>().set('test-id', mockEffect),
+      effects: new MockCollection<ActiveEffect>([['test-id', mockEffect]]),
       createEmbeddedDocuments: jest.fn().mockResolvedValue([]),
       uuid: "test-uuid"
-    };
+    } as unknown as EffectOwner;
 
     const li = document.createElement('li');
     li.dataset.effectType = "temporary";
@@ -154,7 +155,7 @@ describe("Effect Helpers", () => {
     it("categorizes Collection effects correctly", () => {
       const mockEffects = new MockCollection<ActiveEffect>(
         effects.map((e) => [e.id, e])
-      );
+      ) as unknown as foundry.utils.Collection<ActiveEffect>;
       const categories = prepareActiveEffectCategories(mockEffects);
       expect(categories.inactive.effects).toContainEqual(effects[0]);
       expect(categories.temporary.effects).toContainEqual(effects[1]);

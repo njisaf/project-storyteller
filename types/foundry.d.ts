@@ -51,18 +51,33 @@ declare global {
     }
 
     namespace abstract {
+      interface DataModelOptions {
+        strict?: boolean;
+        clean?: boolean;
+      }
+
       class TypeDataModel {
         toObject(): Record<string, unknown>;
-        constructor(data: object, options?: object);
+        constructor(data: object, options?: DataModelOptions);
         protected _source: Record<string, unknown>;
+        static defineSchema(): foundry.data.fields.SchemaField<any>;
+        prepareDerivedData(): void;
       }
+
       class DataModel extends TypeDataModel {
-        static defineSchema(): foundry.data.fields.SchemaField;
+        static defineSchema(): foundry.data.fields.SchemaField<any>;
+        static cleanData<T extends Record<string, unknown>>(source: T, options?: DataModelOptions): T;
       }
     }
 
     namespace data {
       namespace fields {
+        interface FieldOptions {
+          required?: boolean;
+          nullable?: boolean;
+          initial?: unknown;
+        }
+
         class SchemaField<T = Record<string, unknown>> {
           constructor(fields: Record<string, any>);
         }
@@ -91,8 +106,25 @@ declare global {
             initial?: boolean;
           });
         }
+
+        class HTMLField extends StringField {
+          constructor(options?: FieldOptions & { initial?: string });
+        }
+
+        class ArrayField<T> extends DataField<T[]> {
+          constructor(element: DataField<T>);
+        }
+
+        class DataField<T = unknown, O extends FieldOptions = FieldOptions> {
+          constructor(options?: O);
+        }
       }
     }
+  }
+
+  interface User {
+    id: string;
+    name: string;
   }
 
   interface Game {
@@ -104,6 +136,7 @@ declare global {
       get: (module: string, key: string) => any;
     };
     projectstoryteller?: Record<string, unknown>;
+    user: User;
   }
 
   interface DocumentData {
@@ -161,11 +194,14 @@ declare global {
 
   class Roll {
     constructor(formula: string, data?: Record<string, unknown>);
+    evaluate(): Promise<Roll>;
+    total: number;
+    terms: { total: number }[];
     toMessage(options: {
       speaker: unknown;
       flavor: string;
-      rollMode: string;
-    }): void;
+      rollMode?: string;
+    }): Promise<void>;
   }
 
   interface CONFIG {
@@ -208,7 +244,7 @@ declare global {
   }
 
   interface ChatMessage {
-    getSpeaker: (options: { actor: Actor }) => unknown;
+    getSpeaker: (options?: { user?: User; actor?: Actor }) => unknown;
   }
 
   var TextEditor: TextEditor;

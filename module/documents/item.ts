@@ -5,19 +5,17 @@
  * @extends {Item}
  */
 export class StorytellerItem extends Item {
-  actor?: {
-    getRollData: () => Record<string, unknown>;
-  };
+  declare actor: Actor | null;
 
-  system: {
+  declare system: {
     formula?: string;
     description?: string;
     toPlainObject: () => Record<string, unknown>;
   } & Record<string, unknown>;
 
-  effects?: foundry.utils.Collection<unknown>;
-  type: string;
-  name: string;
+  declare effects?: foundry.utils.Collection<unknown>;
+  declare type: string;
+  declare name: string;
 
   /**
    * @override
@@ -42,9 +40,13 @@ export class StorytellerItem extends Item {
    * Convert the item document to a plain object
    */
   toPlainObject(): Record<string, unknown> {
-    const result = { ...this };
-    result.system = this.system.toPlainObject();
-    result.effects = this.effects?.size > 0 ? this.effects.contents : [];
+    const result: Record<string, unknown> = { ...this };
+    if (this.system.toPlainObject) {
+      result.system = this.system.toPlainObject();
+    }
+    if (this.effects?.size > 0) {
+      result.effects = this.effects.contents;
+    }
     return result;
   }
 
@@ -76,12 +78,4 @@ export class StorytellerItem extends Item {
     });
     return roll;
   }
-}
-
-interface Roll {
-  toMessage(options: {
-    speaker: unknown;
-    rollMode: string;
-    flavor: string;
-  }): void;
 }

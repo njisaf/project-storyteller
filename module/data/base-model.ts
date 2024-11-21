@@ -3,13 +3,31 @@
  * Provides common functionality and data handling methods
  * @see {@link https://foundryvtt.wiki/en/development/api/data/data-model} FoundryVTT DataModel Documentation
  */
-export class StorytellerDataModel extends (globalThis as any).foundry.abstract.TypeDataModel {
+
+declare global {
+  namespace foundry {
+    namespace abstract {
+      interface TypeDataModel {
+        _source: Record<string, unknown>;
+        static defineSchema(): foundry.data.fields.SchemaField<any>;
+        toObject(): Record<string, unknown>;
+        prepareDerivedData(): void;
+      }
+    }
+  }
+}
+
+/**
+ * Base data model for Project Storyteller system
+ * @extends {foundry.abstract.TypeDataModel}
+ */
+export class StorytellerDataModel extends foundry.abstract.TypeDataModel {
   /**
    * Define the base schema for all Project Storyteller data models
    * @returns {Object} Schema definition
    */
-  static defineSchema(): Record<string, unknown> {
-    return {};
+  static defineSchema(): foundry.data.fields.SchemaField<any> {
+    return new foundry.data.fields.SchemaField({});
   }
 
   /**
@@ -21,5 +39,13 @@ export class StorytellerDataModel extends (globalThis as any).foundry.abstract.T
    */
   toPlainObject(): Record<string, unknown> {
     return { ...this._source };
+  }
+
+  /**
+   * Prepare derived data
+   * @override
+   */
+  prepareDerivedData(): void {
+    super.prepareDerivedData();
   }
 }

@@ -6,21 +6,34 @@ describe("StorytellerActorBase", () => {
   let actor: StorytellerActorBase;
 
   beforeEach(() => {
-    actor = new StorytellerActorBase({
-      _source: {
-        aspects: {
-          focus: { value: 3, modifier: 0 },
-          grace: { value: 6, modifier: 0 },
-          intellect: { value: 9, modifier: 0 },
-          might: { value: 12, modifier: 0 }
-        },
-        health: { value: 10, max: 10 },
-        actionPoints: { value: 3, max: 3 }
-      }
-    } as any, {});
+    // Mock foundry.data.fields
+    const mockSchemaField = jest.fn().mockImplementation((data) => data);
+    const mockNumberField = jest.fn().mockImplementation(() => ({ initial: 0 }));
 
-    // Ensure the data is accessible on the instance
-    Object.assign(actor, actor._source);
+    global.foundry = {
+      data: {
+        fields: {
+          SchemaField: mockSchemaField,
+          NumberField: mockNumberField
+        }
+      }
+    };
+
+    // Create mock data
+    const mockData = {
+      aspects: {
+        focus: { value: 3, modifier: 0 },
+        grace: { value: 6, modifier: 0 },
+        intellect: { value: 9, modifier: 0 },
+        might: { value: 12, modifier: 0 }
+      },
+      health: { value: 10, max: 10 },
+      actionPoints: { value: 3, max: 3 }
+    };
+
+    // @ts-ignore - Mock constructor
+    actor = new StorytellerActorBase();
+    Object.assign(actor, mockData);
   });
 
   describe("prepareDerivedData", () => {

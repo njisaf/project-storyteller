@@ -32,12 +32,12 @@ export interface StorytellerActorData {
  * Foundation class for all actor types in Project Storyteller
  * @extends {StorytellerDataModel}
  */
-export class StorytellerActorBase extends StorytellerDataModel {
+export class BaseActor extends StorytellerDataModel {
   declare aspects: AspectFields;
   declare health: HealthData;
   declare actionPoints: ActionPointsData;
 
-  static defineSchema(): foundry.data.fields.SchemaField<StorytellerActorData> {
+  static override defineSchema(): foundry.data.fields.SchemaField<StorytellerActorData> {
     const fields = foundry.data.fields;
     const requiredInteger = {
       required: true,
@@ -45,7 +45,7 @@ export class StorytellerActorBase extends StorytellerDataModel {
       integer: true
     } as const;
 
-    return new fields.SchemaField<StorytellerActorData>({
+    return new fields.SchemaField({
       aspects: new fields.SchemaField({
         focus: new fields.SchemaField({
           value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
@@ -76,7 +76,8 @@ export class StorytellerActorBase extends StorytellerDataModel {
   }
 
   /** @override */
-  prepareDerivedData(): void {
+  override prepareDerivedData(): void {
+    super.prepareDerivedData();
     for (const [, data] of Object.entries(this.aspects)) {
       data.modifier = Math.floor(data.value / 3);
     }

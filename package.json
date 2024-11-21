@@ -7,8 +7,12 @@
     "watch": "concurrently \"tsc --watch\" \"sass src/scss/project-storyteller.scss css/project-storyteller.css --style=expanded --source-map --watch\"",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "lint": "eslint . --ext .ts",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean",
+    "validate": "npm run lint && npm run type-check && npm run test"
   },
   "browserslist": [
     "last 3 versions"

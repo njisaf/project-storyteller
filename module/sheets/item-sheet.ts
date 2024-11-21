@@ -1,17 +1,36 @@
 /// <reference types="../../types/foundry" />
-import { onManageActiveEffect, prepareActiveEffectCategories } from '../helpers/effects';
+import { onManageActiveEffect, prepareActiveEffectCategories, EffectOwner } from '../helpers/effects';
+import '@types/jquery';
+
+declare global {
+  class ItemSheetClass extends DocumentSheet {
+    static get defaultOptions(): DocumentSheet.Options;
+  }
+
+  interface DocumentSheet {
+    getData(): Promise<Record<string, unknown>>;
+  }
+}
+
+interface StorytellerItemSheetData extends Record<string, unknown> {
+  enrichedDescription?: string;
+  system: Record<string, unknown>;
+  flags: Record<string, unknown>;
+  config: typeof CONFIG.PROJECT_STORYTELLER;
+  effects: ReturnType<typeof prepareActiveEffectCategories>;
+}
 
 /**
  * Item sheet implementation for Project Storyteller
  * Extends the base ItemSheet class for handling item-specific UI elements
  * @extends {ItemSheet}
  */
-export class StorytellerItemSheet extends ItemSheet {
-  declare item: Item;
-  declare document: Item;
+export class StorytellerItemSheet extends ItemSheetClass {
+  declare item: Item & EffectOwner;
+  declare document: Item & EffectOwner;
   declare isEditable: boolean;
 
-  static get defaultOptions() {
+  static get defaultOptions(): DocumentSheet.Options {
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ['project-storyteller', 'sheet', 'item'],
       width: 520,
@@ -25,22 +44,33 @@ export class StorytellerItemSheet extends ItemSheet {
     return `${path}/item-${this.item.type}-sheet.hbs`;
   }
 
-  async getData(): Promise<Record<string, unknown>> {
-    const context = await super.getData();
-    const itemData = this.document.toObject();
+  async getData(): Promise<StorytellerItemSheetData> {
+    const baseContext = await super.getData();
+    const itemData = this.document.toObject() as {
+      system: Record<string, unknown>;
+      flags: Record<string, unknown>;
+    };
     const description = this.item.system.description || '';
 
-    context.enrichedDescription = await TextEditor.enrichHTML(description, {
-      secrets: this.document.isOwner,
-      async: true,
-      rollData: this.item.getRollData(),
-      relativeTo: this.item,
-    });
+    const context: StorytellerItemSheetData = {
+      ...baseContext,
+      system: itemData.system,
+      flags: itemData.flags,
+      config: CONFIG.PROJECT_STORYTELLER,
+      effects: prepareActiveEffectCategories(this.item.effects),
+    };
 
-    context.system = itemData.system;
-    context.flags = itemData.flags;
-    context.config = CONFIG.PROJECT_STORYTELLER;
-    context.effects = prepareActiveEffectCategories(this.item.effects);
+    try {
+      context.enrichedDescription = await TextEditor.enrichHTML(description, {
+        secrets: this.document.isOwner,
+        async: true,
+        rollData: this.item.getRollData(),
+        relativeTo: this.item,
+      });
+    } catch (error) {
+      console.error("Error enriching description:", error);
+      context.enrichedDescription = description;
+    }
 
     return context;
   }
@@ -48,6 +78,6 @@ export class StorytellerItemSheet extends ItemSheet {
   activateListeners(html: JQuery): void {
     super.activateListeners(html);
     if (!this.isEditable) return;
-    html.on('click', '.effect-control', (ev) => onManageActiveEffect(ev, this.item));
+    html.on('click', '.effect-control', (ev) => onManageActiveEffect(ev as unknown as MouseEvent, this.item));
   }
 }
