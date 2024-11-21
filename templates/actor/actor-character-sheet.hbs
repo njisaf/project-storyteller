@@ -5,20 +5,23 @@
       <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name" /></h1>
       <div class="resources grid grid-3col">
         <div class="resource flex-group-center">
-          <label for="system.health.value" class="resource-label">Health</label>
+          <label for="health-value" class="resource-label">Health</label>
           <div class="resource-content flexrow flex-center flex-between">
-            <input type="text" name="system.health.value" value="{{system.health.value}}" data-dtype="Number" />
+            <input id="health-value" type="text" name="system.health.value" value="{{system.health.value}}"
+              data-dtype="Number" />
             <span> / </span>
-            <input type="text" name="system.health.max" value="{{system.health.max}}" data-dtype="Number" />
+            <input id="health-max" type="text" name="system.health.max" value="{{system.health.max}}"
+              data-dtype="Number" />
           </div>
         </div>
         <div class="resource flex-group-center">
-          <label for="system.actionPoints.value" class="resource-label">Action Points</label>
+          <label for="actionPoints-value" class="resource-label">Action Points</label>
           <div class="resource-content flexrow flex-center flex-between">
-            <input type="text" name="system.actionPoints.value" value="{{system.actionPoints.value}}"
-              data-dtype="Number" />
+            <input id="actionPoints-value" type="text" name="system.actionPoints.value"
+              value="{{system.actionPoints.value}}" data-dtype="Number" />
             <span> / </span>
-            <input type="text" name="system.actionPoints.max" value="{{system.actionPoints.max}}" data-dtype="Number" />
+            <input id="actionPoints-max" type="text" name="system.actionPoints.max" value="{{system.actionPoints.max}}"
+              data-dtype="Number" />
           </div>
         </div>
       </div>
@@ -37,21 +40,25 @@
   <section class="sheet-body">
     {{!-- Aspects Tab --}}
     <div class="tab aspects" data-group="primary" data-tab="aspects">
+      {{#if system.aspects}}
       <div class="aspects-list">
         {{#each system.aspects as |aspect key|}}
         <div class="aspect flexrow flex-group-center">
-          <label for="system.aspects.{{key}}.value" class="resource-label">{{key}}</label>
+          <label for="aspect-{{key}}" class="resource-label">{{key}}</label>
           <div class="resource-content flexrow flex-center flex-between">
-            <input type="text" name="system.aspects.{{key}}.value" value="{{aspect.value}}" data-dtype="Number" />
+            <input id="aspect-{{key}}" type="text" name="system.aspects.{{key}}.value" value="{{aspect.value}}"
+              data-dtype="Number" />
             <span class="aspect-mod">({{numberFormat aspect.modifier decimals=0 sign=true}})</span>
           </div>
         </div>
         {{/each}}
       </div>
+      {{/if}}
     </div>
 
     {{!-- Skills Tab --}}
     <div class="tab skills" data-group="primary" data-tab="skills">
+      {{#if system.skills}}
       {{#each system.skills as |skillCategory categoryKey|}}
       <div class="skill-category">
         <h2>{{categoryKey}}</h2>
@@ -60,11 +67,12 @@
           <div class="skill flexrow">
             <span class="skill-name">{{skillKey}}</span>
             <div class="skill-controls">
-              <label>Base</label>
-              <input type="text" name="system.skills.{{categoryKey}}.{{skillKey}}.value" value="{{skill.value}}"
-                data-dtype="Number" />
-              <label>Apt</label>
-              <input type="text" name="system.skills.{{categoryKey}}.{{skillKey}}.aptitude" value="{{skill.aptitude}}"
+              <label for="skill-{{categoryKey}}-{{skillKey}}-value">Base</label>
+              <input id="skill-{{categoryKey}}-{{skillKey}}-value" type="text"
+                name="system.skills.{{categoryKey}}.{{skillKey}}.value" value="{{skill.value}}" data-dtype="Number" />
+              <label for="skill-{{categoryKey}}-{{skillKey}}-aptitude">Apt</label>
+              <input id="skill-{{categoryKey}}-{{skillKey}}-aptitude" type="text"
+                name="system.skills.{{categoryKey}}.{{skillKey}}.aptitude" value="{{skill.aptitude}}"
                 data-dtype="Number" />
               <span class="skill-total">Total: {{skill.total}}</span>
               <button type="button" class="skill-roll" data-skill="{{skillKey}}" data-category="{{categoryKey}}">
@@ -76,36 +84,41 @@
         </div>
       </div>
       {{/each}}
+      {{/if}}
     </div>
 
     {{!-- Description Tab --}}
     <div class="tab description" data-group="primary" data-tab="description">
       <div class="form-group">
-        <label>Descent</label>
-        <input type="text" name="system.descent" value="{{system.descent}}" />
+        <label for="descent">Descent</label>
+        <input id="descent" type="text" name="system.descent" value="{{system.descent}}" />
       </div>
       <div class="form-group">
-        <label>Culture</label>
-        <input type="text" name="system.culture" value="{{system.culture}}" />
+        <label for="culture">Culture</label>
+        <input id="culture" type="text" name="system.culture" value="{{system.culture}}" />
       </div>
       <div class="form-group">
-        <label>Vocation</label>
-        <input type="text" name="system.vocation" value="{{system.vocation}}" />
+        <label for="vocation">Vocation</label>
+        <input id="vocation" type="text" name="system.vocation" value="{{system.vocation}}" />
       </div>
       <div class="form-group">
-        <label>Role</label>
-        <input type="text" name="system.role" value="{{system.role}}" />
+        <label for="role">Role</label>
+        <input id="role" type="text" name="system.role" value="{{system.role}}" />
       </div>
+      {{#if system.biography}}
       <div class="form-group">
-        <label>Biography</label>
-        {{editor content=system.biography target="system.biography" button=true owner=owner editable=editable engine="prosemirror"}}
+        <label for="biography">Biography</label>
+        {{editor content=system.biography target="system.biography" button=true owner=owner editable=editable
+        engine="prosemirror"}}
       </div>
+      {{/if}}
     </div>
 
     {{!-- Items Tab --}}
     <div class="tab items" data-group="primary" data-tab="items">
+      {{#if actor.items}}
       <ol class="items-list">
-        {{#each actor.items as |item id|}}
+        {{#each actor.items as |item|}}
         <li class="item flexrow" data-item-id="{{item._id}}">
           <img src="{{item.img}}" title="{{item.name}}" width="24" height="24" />
           <h4 class="item-name">{{item.name}}</h4>
@@ -116,6 +129,7 @@
         </li>
         {{/each}}
       </ol>
+      {{/if}}
     </div>
   </section>
 </form>
